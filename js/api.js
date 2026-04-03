@@ -357,11 +357,21 @@ async getArtist(artistId) {
     
     entries.forEach(entry => scan(entry));
     
-    const albums = Array.from(albumMap.values()).sort((a, b) => 
-        new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0)
-    );
+    const numericArtistId = Number(artistId);
+    const albums = Array.from(albumMap.values())
+        .filter(album => {
+            const id = album.artist?.id;
+            return id === numericArtistId ||
+                (Array.isArray(album.artists) && album.artists.some(a => a.id === numericArtistId));
+        })
+        .sort((a, b) => new Date(b.releaseDate || 0) - new Date(a.releaseDate || 0));
     
     const tracks = Array.from(trackMap.values())
+        .filter(track => {
+            const id = track.artist?.id;
+            return id === numericArtistId ||
+                (Array.isArray(track.artists) && track.artists.some(a => a.id === numericArtistId));
+        })
         .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
         .slice(0, 10);
     
